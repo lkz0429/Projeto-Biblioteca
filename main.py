@@ -9,20 +9,26 @@ Janela = None
 entrada_nome = None
 entrada_livro = None
 entrada_cpf = None
-entrada_pontos = None
+entrada_prazo = None
 
 class usuario:
 
     def __init__(self):
-          
-          global entrada_nome, entrada_livro, entrada_cpf, entrada_pontos
 
-    def definir_usuario(self):
+        pass
+
+    def definir_usuario():
+
+        try:
+            with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
+                usuarios = json.load(arquivo)
+        except:
+            usuarios = {}
 
         usuarios[entrada_nome.get()] = {
             "Livro": entrada_livro.get(),
             "cpf": entrada_cpf.get(),
-            "pontos": entrada_pontos.get()
+            "prazo": entrada_prazo.get()
         }
 
         with open("Dados.JSON", "w", encoding="utf-8") as Dados_usuarios:
@@ -31,7 +37,16 @@ class usuario:
         entrada_nome.delete(0, tkinter.END)
         entrada_livro.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
-        entrada_pontos.delete(0, tkinter.END)
+        entrada_prazo.delete(0, tkinter.END)
+
+    def limpar_campo_entrada():
+
+        entrada_nome.delete(0, tkinter.END)
+        entrada_livro.delete(0, tkinter.END)
+        entrada_cpf.delete(0, tkinter.END)
+        entrada_prazo.delete(0, tkinter.END)
+        
+
 
     def somar_pontos(self):
 
@@ -45,18 +60,19 @@ class usuario:
             json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
     def adicionar_usuario():
-        global entrada_nome, entrada_cpf, entrada_livro, entrada_pontos
+
+        global entrada_nome, entrada_livro, entrada_cpf, entrada_prazo
 
         Cadastro_nome = tkinter.Toplevel(Janela)
-        Cadastro_nome.title("Cadastro de usuário")
-        Cadastro_nome.minsize(500, 200)
-        Cadastro_nome.maxsize(500, 200)
+        Cadastro_nome.title("Novo Usuário")
+        Cadastro_nome.minsize(600, 400)
+        Cadastro_nome.maxsize(600, 400)
 
         toplevelcadastro = tkinter.Frame(
 
             Cadastro_nome, 
-            width=500, 
-            height=200,
+            width=600, 
+            height=300,
             bd=0,
             bg="gray",
             relief="solid"
@@ -69,19 +85,27 @@ class usuario:
         titulo.pack(padx=0, pady=2, side="top")
 
 
+        tkinter.Label(toplevelcadastro, text="Nome:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_nome = ttk.Entry(toplevelcadastro)
         entrada_nome.pack(padx=0, pady=5, side="top")
 
+        tkinter.Label(toplevelcadastro, text="livro:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_livro = ttk.Entry(toplevelcadastro)
         entrada_livro.pack(padx=0, pady=5, side="top")
 
+        tkinter.Label(toplevelcadastro, text="cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_cpf = ttk.Entry(toplevelcadastro)
         entrada_cpf.pack(padx=0, pady=5, side="top")
 
-        entrada_pontos = ttk.Entry(toplevelcadastro)
-        entrada_pontos.pack(padx=0, pady=5, side="top")
+        tkinter.Label(toplevelcadastro, text="prazo:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        entrada_prazo = ttk.Entry(toplevelcadastro)
+        entrada_prazo.pack(padx=0, pady=5, side="top")
 
-        entrada_nome.bind("<Return>", usuario.definir_usuario)
+        enviar = tkinter.Button(toplevelcadastro, text="Cadastrar", command=usuario.definir_usuario, font=("Arial", 12, "bold"), width=7, height=3)
+        enviar.pack(padx=75, side="right")
+
+        limpar = tkinter.Button(toplevelcadastro, text="Limpar", command=usuario.limpar_campo_entrada, font=("Arial", 12, "bold"), width=7, height=3)
+        limpar.pack(padx=75, side="left")
           
 def main():
     global Janela
@@ -141,12 +165,34 @@ def main():
 
     Frame_direito.pack_propagate(False)
 
+    Frame_mid = tkinter.Frame(
+    
+            Janela, 
+            width=300,
+            height=250,
+            bd=5,
+            relief="solid"
+        )
+    Frame_mid.pack(
+    
+            padx=40,
+            pady=0,
+            side="right"
+    
+        )
+    
+    Descricao2 = tkinter.Label(Frame_mid, text="O sistema de pontos é uma maneira de penalizar aqueles que descumprem o prazo, você pode verificar a situação dos usuários em cadastros", font=("Arial", 19, "bold"), wraplength=300)
+    
+    Descricao2.pack(padx=0, pady=0)
+    
+    Frame_mid.pack_propagate(False)
+
 
     area_botao = tkinter.Frame(
 
         Janela, 
         width=200, 
-        height=400,
+        height=300,
         bd=5,
         relief="solid"
     )
@@ -162,8 +208,8 @@ def main():
 
     botao1 = tkinter.Button(
         area_botao,
-        text="Verificar Pontos",
-        font=("Arial", 15, "bold"),
+        text="cadastros",
+        font=("Arial", 12, "bold"),
         command=janela_pontos,
         width=14,
         height=2,
@@ -173,7 +219,7 @@ def main():
     botao2 = tkinter.Button(
         area_botao,
         text="Adicionar usuário",
-        font=("Arial", 15, "bold"),
+        font=("Arial", 12, "bold"),
         command=usuario.adicionar_usuario,
         width=14,
         height=2,
@@ -186,9 +232,10 @@ def janela_pontos():
     global nome
 
     janela = tkinter.Toplevel(Janela)
-    janela.title("Pontos")
+    janela.title("Cadastros")
     janela.transient(Janela)
     janela.minsize(560, 380)
+    janela.maxsize(9680, 300)
 
     with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
         usuarios = json.load(arquivo)
@@ -209,7 +256,7 @@ def janela_pontos():
         texto += f"Nome: {nome}\n"
         texto += f"Livro: {usuarios[nome]['Livro']}\n"
         texto += f"CPF: {usuarios[nome]['cpf']}\n\n"
-        texto += f"Pontos: {usuarios[nome]['pontos']}\n\n\n"
+        texto += f"Prazo: {usuarios[nome]['prazo']}\n\n\n"
 
 
     usuarios_label = ttk.Label(
