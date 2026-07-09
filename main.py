@@ -1,7 +1,6 @@
 import tkinter
 from tkinter import ttk
 import json
-import time
 
 usuarios = {}
 
@@ -23,7 +22,8 @@ class usuario:
             with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
                 usuarios = json.load(arquivo)
         except:
-            usuarios = {}
+            with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
+                        usuarios = json.dump({},arquivo)
 
         usuarios[entrada_nome.get()] = {
             "Livro": entrada_livro.get(),
