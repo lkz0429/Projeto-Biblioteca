@@ -24,6 +24,9 @@ class usuario:
         except:
             with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
                         usuarios = json.dump({},arquivo)
+            
+            with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
+                        usuarios = json.load(arquivo)
 
         usuarios[entrada_nome.get()] = {
             "Livro": entrada_livro.get(),
