@@ -26,7 +26,7 @@ class usuario:
                         usuarios = json.dump({},arquivo)
             
             with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
-                        usuarios = json.load(arquivo)
+                    usuarios = json.load(arquivo)
 
         usuarios[entrada_nome.get()] = {
             "Livro": entrada_livro.get(),
@@ -238,7 +238,7 @@ def janela_pontos():
     janela.title("Cadastros")
     janela.transient(Janela)
     janela.minsize(560, 380)
-    janela.maxsize(9680, 300)
+    janela.maxsize(560, 9800)
 
     with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
         usuarios = json.load(arquivo)
