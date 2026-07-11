@@ -33,7 +33,7 @@ class usuario:
         usuarios[entrada_cpf.get()] = {
             "nome": entrada_nome.get(),
             "prazo": f"{3} dias",
-            "livro": "",
+            "livro": "nenhum",
             "pontos": 0
         }
 
@@ -211,6 +211,10 @@ class usuario:
 
         limpar = tkinter.Button(topleveldepenalidades, text="Limpar", command=usuario.limpar_campo_penalidades, font=("Arial", 12, "bold"), width=7, height=3)
         limpar.pack(padx=75, side="left")
+
+    def devolver_livro():
+
+        pass
          
 def main():
     global Janela
@@ -264,7 +268,7 @@ def main():
 
     )
 
-    Descricao = tkinter.Label(Frame_direito, text="Este organizador serve para que sistemas de bibliotecas sejam admnistrados de maneira dinâmica, serve como um registro de prazos e histórico de cada pessoa a pegar livros emprestados!!!", font=("Arial", 17, "bold"), wraplength=300)
+    Descricao = tkinter.Label(Frame_direito, text="Este organizador serve para que sistemas de bibliotecas sejam admnistradas de maneira dinâmica. Serve como um meio de controle para aquelas pessoas que forem pegar livros emprestados!!!", font=("Arial", 17, "bold"), wraplength=300)
 
     Descricao.pack(padx=5, pady=20)
 
@@ -274,7 +278,7 @@ def main():
 
         Janela, 
         width=600, 
-        height=300,
+        height=270,
         bd=5,
         relief="solid"
     )
@@ -290,7 +294,7 @@ def main():
 
     botao1 = tkinter.Button(
         area_botao,
-        text="cadastros",
+        text="Cadastros",
         font=("Arial", 12, "bold"),
         command=janela_pontos,
         width=14,
@@ -300,7 +304,7 @@ def main():
 
     botao2 = tkinter.Button(
         area_botao,
-        text="Adicionar usuário",
+        text="Cadastrar usuário",
         font=("Arial", 12, "bold"),
         command=usuario.adicionar_usuario,
         width=14,
@@ -320,12 +324,22 @@ def main():
 
     botao4 = tkinter.Button(
          area_botao,
-         text="associar-livro",
+         text="Associar livro",
          font=("Arial", 12, "bold"),
          command=usuario.associar_livro,
          width=14,
          height=2
     )
+    botao4.pack(anchor="w")
+
+    botao4 = tkinter.Button(
+             area_botao,
+             text="Devolução livro",
+             font=("Arial", 12, "bold"),
+             command=usuario.devolver_livro,
+             width=14,
+             height=2
+        )
     botao4.pack(anchor="w")
 
     Janela.mainloop()
