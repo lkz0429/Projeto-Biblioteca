@@ -31,7 +31,7 @@ class usuario:
             "nome": entrada_nome.get(),
             "prazo": f"{0} dias",
             "livro": "Nenhum",
-            "pontos": 0
+            "pontos": int(0)
         }
 
         with open("Dados.JSON", "w", encoding="utf-8") as Dados_usuarios:
@@ -226,9 +226,10 @@ class usuario:
         
         cpf = entrada_cpf.get()
         
-        if cpf in usuarios:
+        if usuarios[cpf]["livro"] != "Nenhum":
              usuarios[cpf]["livro"] = "Nenhum"
              usuarios[cpf]["prazo"] = 0
+             usuarios[cpf]["pontos"] -= 1
         
         with open("Dados.JSON", "w") as arquivo:
                 json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
@@ -327,7 +328,7 @@ def main():
 
         Janela, 
         width=350,
-        height=300,
+        height=270,
         bd=5,
         relief="solid"
     )
@@ -339,7 +340,7 @@ def main():
 
     )
 
-    Descricao = tkinter.Label(Frame_direito, text="Este organizador serve para que sistemas de bibliotecas sejam admnistradas de maneira dinâmica. Serve como um meio de controle para aquelas pessoas que forem pegar livros emprestados!!!", font=("Arial", 17, "bold"), wraplength=300)
+    Descricao = tkinter.Label(Frame_direito, text="Este organizador serve para que sistemas de bibliotecas sejam admnistradas de maneira dinâmica. Serve como um meio de controle para aquelas pessoas que forem pegar livros emprestados!!!", font=("Arial", 17, "bold"), wraplength=330)
 
     Descricao.pack(padx=5, pady=20)
 
@@ -348,7 +349,7 @@ def main():
     area_botao = tkinter.Frame(
 
         Janela, 
-        width=600, 
+        width=150, 
         height=270,
         bd=5,
         relief="solid"
@@ -362,6 +363,77 @@ def main():
     )
 
     area_botao.pack_propagate(False)
+
+    area_explicacao = tkinter.Frame(
+
+        Janela,
+        width=300,
+        height=270,
+        bd=5,
+        relief="solid"
+    )
+    area_explicacao.pack(
+         
+        
+        side="left"
+    )
+
+    area_explicacao.pack_propagate(False)
+
+    explicacao_cadastros = tkinter.Frame(
+
+         area_explicacao,
+         width=300,
+         height=54,
+         bd=1,
+         relief="solid"
+    )
+    explicacao_cadastros.pack(side="top")
+    explicacao_cadastros.pack_propagate(False)
+
+    explicacao_usuario = tkinter.Frame(
+    
+            area_explicacao,
+            width=300,
+            height=54,
+            bd=1,
+            relief="solid"
+    )
+    explicacao_usuario.pack(side="top")
+    explicacao_usuario.pack_propagate(False)
+
+    explicacao_penalidade = tkinter.Frame(
+    
+             area_explicacao,
+             width=300,
+             height=54,
+             bd=1,
+             relief="solid"
+        )
+    explicacao_penalidade.pack(side="top")
+    explicacao_penalidade.pack_propagate(False)
+
+    explicacao_associar = tkinter.Frame(
+    
+             area_explicacao,
+             width=300,
+             height=54,
+             bd=1,
+             relief="solid"
+        )
+    explicacao_associar.pack(side="top")
+    explicacao_associar.pack_propagate(False)
+
+    explicacao_devolver = tkinter.Frame(
+    
+            area_explicacao,
+            width=300,
+            height=54,
+            bd=1,
+            relief="solid"
+    )
+    explicacao_devolver.pack(side="top")
+    explicacao_devolver.pack_propagate(False)
 
     botao1 = tkinter.Button(
         area_botao,
@@ -412,6 +484,8 @@ def main():
              height=2
         )
     botao4.pack(anchor="w")
+
+    
 
     Janela.mainloop()
 
