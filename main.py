@@ -5,12 +5,9 @@ import json
 usuarios = {}
 Janela = None
 entrada_nome = None
+entrada_pontos = None
 entrada_livro = None
 entrada_cpf = None
-entrada_pontos = None
-busca_cpf = None
-entrada_livro = None
-emprestimo_cpf = None
 
 class usuario:
 
@@ -32,8 +29,8 @@ class usuario:
 
         usuarios[entrada_cpf.get()] = {
             "nome": entrada_nome.get(),
-            "prazo": f"{3} dias",
-            "livro": "nenhum",
+            "prazo": f"{0} dias",
+            "livro": "Nenhum",
             "pontos": 0
         }
 
@@ -51,12 +48,17 @@ class usuario:
     def limpar_campo_penalidades():
          
          entrada_pontos.delete(0, tkinter.END)
-         busca_cpf.delete(0, tkinter.END)
+         entrada_cpf.delete(0, tkinter.END)
 
     def limpar_campo_associar():
          
          entrada_livro.delete(0, tkinter.END)
-         emprestimo_cpf.delete(0, tkinter.END)
+         entrada_cpf.delete(0, tkinter.END)
+
+    def limpar_campo_devolver():
+
+         entrada_cpf.delete(0, tkinter.END)
+         
 
     def emprestar():
 
@@ -65,16 +67,18 @@ class usuario:
         with open("Dados.JSON", "r") as arquivo:
              usuarios = json.load(arquivo)
 
-        cpf = emprestimo_cpf.get()
+        cpf = entrada_cpf.get()
+        livro = entrada_livro.get()
 
-        if cpf in usuarios:
-             usuarios[cpf]["livro"] = str(entrada_livro.get())
+        usuarios[cpf]["livro"] = livro
+        usuarios[cpf]["prazo"] = f"{7} dias"
 
-             with open("Dados.JSON", "w") as arquivo:
-                json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
+                usuarios = json.dump(usuarios,arquivo, ensure_ascii=False, indent=2)
+
 
         entrada_livro.delete(0, tkinter.END)
-        emprestimo_cpf.delete(0, tkinter.END)
+        entrada_cpf.delete(0, tkinter.END)
 
     def somar_pontos():
 
@@ -83,7 +87,7 @@ class usuario:
         with open("Dados.JSON", "r") as arquivo:
              usuarios = json.load(arquivo)
 
-        cpf = busca_cpf.get()
+        cpf = entrada_cpf.get()
 
         if cpf in usuarios:
              usuarios[cpf]["pontos"] += int(entrada_pontos.get())
@@ -92,14 +96,14 @@ class usuario:
                   json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
         entrada_pontos.delete(0, tkinter.END)
-        busca_cpf.delete(0, tkinter.END)               
+        entrada_cpf.delete(0, tkinter.END)               
 
     def adicionar_usuario():
 
         global entrada_nome, entrada_cpf
 
         Cadastro_nome = tkinter.Toplevel(Janela)
-        Cadastro_nome.title("Novo Usuário")
+        Cadastro_nome.title("Usuário")
         Cadastro_nome.minsize(600, 300)
         Cadastro_nome.maxsize(600, 300)
 
@@ -116,7 +120,7 @@ class usuario:
         toplevelcadastro.pack(padx=20, pady=20, side="top")
         toplevelcadastro.pack_propagate(False)
 
-        titulo = tkinter.Label(toplevelcadastro, text="Digite o usuário a ser adicionado", font=("Arial", 12, "bold"))
+        titulo = tkinter.Label(toplevelcadastro, text="Digite o usuário\n(em caso de remoção, apenas cpf necessário)", font=("Arial", 12, "bold"))
         titulo.pack(padx=0, pady=10, side="top")
 
 
@@ -129,16 +133,17 @@ class usuario:
         entrada_nome.pack(padx=0, pady=10, side="top")
 
         enviar = tkinter.Button(toplevelcadastro, text="Cadastrar", command=usuario.definir_usuario, font=("Arial", 12, "bold"), width=7, height=3)
-        enviar.pack(padx=75, side="right")
+        enviar.pack(padx=10, side="right")
+
+        remover = tkinter.Button(toplevelcadastro, text="Remover", command=usuario.remover_usuario, font=("Arial", 12, "bold"), width=7, height=3)
+        remover.pack(padx=10, side="right")
 
         limpar = tkinter.Button(toplevelcadastro, text="Limpar", command=usuario.limpar_campo_cadastro, font=("Arial", 12, "bold"), width=7, height=3)
-        limpar.pack(padx=75, side="left")
-
-        #fazer livro associado por cadastro fora de cadastro de usuário, permitindo a adição de valor na chave "livro" de cada usuário, o cadastro deve ser único
+        limpar.pack(padx=65, side="left")
 
     def associar_livro():
 
-        global entrada_livro, emprestimo_cpf
+        global entrada_livro, entrada_cpf
 
         janela = tkinter.Toplevel(Janela)
         janela.title("Empréstimo")
@@ -161,8 +166,8 @@ class usuario:
         titulo.pack(padx=0, pady=10, side="top")
 
         tkinter.Label(topleveldeemprestimo, text="Cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
-        emprestimo_cpf = ttk.Entry(topleveldeemprestimo)
-        emprestimo_cpf.pack(padx=0, pady=10, side="top")
+        entrada_cpf = ttk.Entry(topleveldeemprestimo)
+        entrada_cpf.pack(padx=0, pady=10, side="top")
 
         tkinter.Label(topleveldeemprestimo, text="Livro:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_livro = ttk.Entry(topleveldeemprestimo)
@@ -176,7 +181,7 @@ class usuario:
 
     def penalizar_por_cpf():
 
-        global entrada_pontos, busca_cpf
+        global entrada_pontos, entrada_cpf
 
         janela = tkinter.Toplevel(Janela)
         janela.title("Penalidades")
@@ -199,8 +204,8 @@ class usuario:
         titulo.pack(padx=0, pady=10, side="top")
 
         tkinter.Label(topleveldepenalidades, text="cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
-        busca_cpf = ttk.Entry(topleveldepenalidades)
-        busca_cpf.pack(padx=0, pady=10, side="top")
+        entrada_cpf = ttk.Entry(topleveldepenalidades)
+        entrada_cpf.pack(padx=0, pady=10, side="top")
 
         tkinter.Label(topleveldepenalidades, text="quantia:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_pontos = ttk.Entry(topleveldepenalidades)
@@ -212,11 +217,77 @@ class usuario:
         limpar = tkinter.Button(topleveldepenalidades, text="Limpar", command=usuario.limpar_campo_penalidades, font=("Arial", 12, "bold"), width=7, height=3)
         limpar.pack(padx=75, side="left")
 
+    def devolver():
+
+        global usuarios
+        
+        with open("Dados.JSON", "r") as arquivo:
+             usuarios = json.load(arquivo)
+        
+        cpf = entrada_cpf.get()
+        
+        if cpf in usuarios:
+             usuarios[cpf]["livro"] = "Nenhum"
+             usuarios[cpf]["prazo"] = 0
+        
+        with open("Dados.JSON", "w") as arquivo:
+                json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+        
+        entrada_cpf.delete(0, tkinter.END)
+
     def devolver_livro():
 
-        pass
-         
+        global entrada_cpf
+
+        janela = tkinter.Toplevel(Janela)
+        janela.title("Devolução")
+        janela.transient(Janela)
+        janela.minsize(600, 300)
+        janela.maxsize(600, 300)
+        
+        topleveldeemprestimo = tkinter.Frame(
+                     janela,
+                     width=600,
+                     height=300,
+                     bg="gray",
+                     bd=5,
+                     relief="solid"
+                )
+        topleveldeemprestimo.pack(padx=20, pady=20, side="top")
+        topleveldeemprestimo.pack_propagate(False)
+        
+        titulo = tkinter.Label(topleveldeemprestimo, text="Digite o cpf que realizou a devolução", font=("Arial", 12, "bold"))
+        titulo.pack(padx=0, pady=20, side="top")
+        
+        tkinter.Label(topleveldeemprestimo, text="Cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        entrada_cpf = ttk.Entry(topleveldeemprestimo)
+        entrada_cpf.pack(padx=0, pady=20, side="top")
+        
+        devolver = tkinter.Button(topleveldeemprestimo, text="Devolver", command=usuario.devolver, font=("Arial", 12, "bold"), width=7, height=3)
+        devolver.pack(padx=75, side="right")
+                  
+        limpar = tkinter.Button(topleveldeemprestimo, text="Limpar", command=usuario.limpar_campo_devolver, font=("Arial", 12, "bold"), width=7, height=3)
+        limpar.pack(padx=75, side="left")
+
+    def remover_usuario():
+
+        with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
+            usuarios = json.load(arquivo)
+
+        cpf = entrada_cpf.get()
+
+        if cpf in usuarios:
+            del usuarios[cpf]
+
+        entrada_nome.delete(0, tkinter.END)
+        entrada_cpf.delete(0, tkinter.END)
+
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
+            json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+
+
 def main():
+                
     global Janela
 
     Janela = tkinter.Tk()
@@ -304,7 +375,7 @@ def main():
 
     botao2 = tkinter.Button(
         area_botao,
-        text="Cadastrar usuário",
+        text="Usuário",
         font=("Arial", 12, "bold"),
         command=usuario.adicionar_usuario,
         width=14,
@@ -345,6 +416,13 @@ def main():
     Janela.mainloop()
 
 def janela_pontos():
+
+    try:
+        with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
+                json.load(arquivo)
+    except:
+            with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
+                json.dump({},arquivo)
 
     global usuarios
 

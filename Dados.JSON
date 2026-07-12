@@ -1,14 +1,8 @@
 {
   "129.129": {
-    "nome": "Lucans",
-    "prazo": "3 dias",
-    "livro": "Machado de Asis",
-    "pontos": 0
-  },
-  "128.128": {
-    "nome": "Joao",
-    "prazo": "3 dias",
-    "livro": "Dom casmurro",
+    "nome": "joao",
+    "prazo": "0 dias",
+    "livro": "Nenhum",
     "pontos": 0
   }
 }
