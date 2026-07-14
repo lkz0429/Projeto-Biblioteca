@@ -3,8 +3,7 @@ from tkinter import ttk, messagebox
 import json
 import datetime
 from datetime import datetime, timedelta
-
-usuarios = {}
+usuarios = {"Base": 0}
 Janela = None
 entrada_nome = None
 entrada_telefone = None
@@ -24,7 +23,7 @@ class usuario:
                 usuarios = json.load(arquivo)
         except:
             with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
-                        usuarios = json.dump({},arquivo)
+                        json.dump({},arquivo)
             
             with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
                     usuarios = json.load(arquivo)
@@ -36,10 +35,23 @@ class usuario:
             "pontos": int(0),
             "telefone": entrada_telefone.get()
         }
+        cpf = entrada_cpf.get()
+        telefone = entrada_telefone.get()
         if entrada_cpf.get() == "":
              messagebox.showerror("Erro", "É necessário digitar\n um cpf")
+             return
+        if len(cpf) != 11:
+            messagebox.showerror("Erro", "O CPF deve conter 11 dígitos")
+            return
         if entrada_telefone.get() == "":
              messagebox.showerror("Erro", "É necessário digitar\n um telefone")
+             return
+        if len(telefone) not in (10, 11):
+            messagebox.showerror(
+        "Erro",
+        "O telefone deve conter 10 ou 11 dígitos"
+            )
+            return
 
 
         with open("Dados.JSON", "w", encoding="utf-8") as Dados_usuarios:
@@ -48,6 +60,7 @@ class usuario:
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
         entrada_telefone.delete(0, tkinter.END)
+        messagebox.showinfo("Parabéns", "cadastro concluido")
 
     def limpar_campo_cadastro():
 
@@ -89,7 +102,7 @@ class usuario:
         usuarios[cpf]["prazo"] = prazo.strftime("%Y-%m-%d %H:%M:%S")
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
-                usuarios = json.dump(usuarios,arquivo, ensure_ascii=False, indent=2)
+                json.dump(usuarios,arquivo, ensure_ascii=False, indent=2)
 
 
         entrada_livro.delete(0, tkinter.END)
@@ -109,11 +122,12 @@ class usuario:
             usuarios[cpf]["pontos"] += pontos
         else:
              messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
+             return
         
         
 
         with open("Dados.JSON", "w") as arquivo:
-            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+            json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
         entrada_pontos.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)  
@@ -132,11 +146,12 @@ class usuario:
             usuarios[cpf]["pontos"] -= pontos
         else:
                 messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
+                return
             
             
     
         with open("Dados.JSON", "w") as arquivo:
-            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+            json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
     
         entrada_pontos.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)             
@@ -279,15 +294,17 @@ class usuario:
 
         if cpf not in usuarios:
              messagebox.showerror("Erro", "Este usuário não existe")
+             return
              
         if usuarios[cpf]["livro"] == "Nenhum":
              messagebox.showerror("Erro", "Este usuário não possue um empréstimo no momento")
+             return
         else:
             usuarios[cpf]["livro"] = "Nenhum"
             usuarios[cpf]["prazo"] = "0 dias"
         
         with open("Dados.JSON", "w") as arquivo:
-                usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+                json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
         
         entrada_cpf.delete(0, tkinter.END)
 
@@ -336,12 +353,13 @@ class usuario:
             del usuarios[cpf]
         else:
              messagebox.showerror("Erro", "esse usuário não existe")
+             return
 
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
-            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+            json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
     def verificar_prazos():
 
@@ -349,6 +367,7 @@ class usuario:
 
         with open("Dados.JSON", "r") as arquivo:
                 usuarios = json.load(arquivo)
+        
         for cpf in usuarios:
 
             if usuarios[cpf]["prazo"] != "0 dias":
@@ -361,11 +380,10 @@ class usuario:
                 if datetime.now() >= prazo:
 
                     usuarios[cpf]["pontos"] += 1
-                    usuarios[cpf]["livro"] = "Nenhum"
                     usuarios[cpf]["prazo"] = "0 dias"
 
         with open("Dados.JSON", "w") as arquivo:
-            usuarios = json.dump(usuarios, arquivo, indent=2)
+           json.dump(usuarios, arquivo, indent=2)
 
     def atualizar():
         usuario.verificar_prazos()
@@ -557,7 +575,7 @@ def main():
 
     botao1 = tkinter.Button(
         area_botao,
-        text="Cadastros",
+        text="Usuários",
         font=("Arial", 12, "bold"),
         command=janela_pontos,
         width=14,
@@ -567,7 +585,7 @@ def main():
 
     botao2 = tkinter.Button(
         area_botao,
-        text="Usuário",
+        text="Cadastrar",
         font=("Arial", 12, "bold"),
         command=usuario.adicionar_usuario,
         width=14,
