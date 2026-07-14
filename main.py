@@ -1,14 +1,16 @@
 import tkinter
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import json
+import datetime
+from datetime import datetime, timedelta
 
 usuarios = {}
 Janela = None
 entrada_nome = None
+entrada_telefone = None
 entrada_pontos = None
 entrada_livro = None
 entrada_cpf = None
-
 class usuario:
 
     def __init__(self):
@@ -31,19 +33,27 @@ class usuario:
             "nome": entrada_nome.get(),
             "prazo": f"{0} dias",
             "livro": "Nenhum",
-            "pontos": int(0)
+            "pontos": int(0),
+            "telefone": entrada_telefone.get()
         }
+        if entrada_cpf.get() == "":
+             messagebox.showerror("Erro", "É necessário digitar\n um cpf")
+        if entrada_telefone.get() == "":
+             messagebox.showerror("Erro", "É necessário digitar\n um telefone")
+
 
         with open("Dados.JSON", "w", encoding="utf-8") as Dados_usuarios:
             json.dump(usuarios, Dados_usuarios, ensure_ascii=False, indent=2)
 
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
+        entrada_telefone.delete(0, tkinter.END)
 
     def limpar_campo_cadastro():
 
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
+        entrada_telefone.delete(0, tkinter.END)
 
     def limpar_campo_penalidades():
          
@@ -69,9 +79,14 @@ class usuario:
 
         cpf = entrada_cpf.get()
         livro = entrada_livro.get()
+        prazo = datetime.now() + timedelta(seconds=15)
 
-        usuarios[cpf]["livro"] = livro
-        usuarios[cpf]["prazo"] = f"{7} dias"
+        for cpf_ocupante in usuarios:
+            if usuarios[cpf_ocupante]["livro"] == livro:
+                 messagebox.showerror("Erro", "Livro já está emprestado\n aguarde o prazo do possuinte acabar")
+                 return
+        usuarios[cpf]["livro"] = livro         
+        usuarios[cpf]["prazo"] = prazo.strftime("%Y-%m-%d %H:%M:%S")
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
                 usuarios = json.dump(usuarios,arquivo, ensure_ascii=False, indent=2)
@@ -80,7 +95,7 @@ class usuario:
         entrada_livro.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
 
-    def somar_pontos():
+    def add_pontos():
 
         global usuarios
 
@@ -88,28 +103,57 @@ class usuario:
              usuarios = json.load(arquivo)
 
         cpf = entrada_cpf.get()
+        pontos = int(entrada_pontos.get())
 
-        if cpf in usuarios:
-             usuarios[cpf]["pontos"] += int(entrada_pontos.get())
+        if pontos >= 1:
+            usuarios[cpf]["pontos"] += pontos
+        else:
+             messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
+        
+        
 
-             with open("Dados.JSON", "w") as arquivo:
-                  json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+        with open("Dados.JSON", "w") as arquivo:
+            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
         entrada_pontos.delete(0, tkinter.END)
-        entrada_cpf.delete(0, tkinter.END)               
+        entrada_cpf.delete(0, tkinter.END)  
+
+    def remove_pontos():
+    
+        global usuarios
+    
+        with open("Dados.JSON", "r") as arquivo:
+            usuarios = json.load(arquivo)
+    
+        cpf = entrada_cpf.get()
+        pontos = int(entrada_pontos.get())
+    
+        if pontos >= 1:
+            usuarios[cpf]["pontos"] -= pontos
+        else:
+                messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
+            
+            
+    
+        with open("Dados.JSON", "w") as arquivo:
+            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+    
+        entrada_pontos.delete(0, tkinter.END)
+        entrada_cpf.delete(0, tkinter.END)             
 
     def adicionar_usuario():
 
-        global entrada_nome, entrada_cpf
+        global entrada_nome, entrada_cpf, entrada_telefone
 
-        Cadastro_nome = tkinter.Toplevel(Janela)
-        Cadastro_nome.title("Usuário")
-        Cadastro_nome.minsize(600, 300)
-        Cadastro_nome.maxsize(600, 300)
+        janela = tkinter.Toplevel(Janela)
+        janela.title("Usuário")
+        janela.transient(Janela)
+        janela.minsize(600, 350)
+        janela.maxsize(600, 350)
 
         toplevelcadastro = tkinter.Frame(
 
-            Cadastro_nome, 
+            janela, 
             width=600, 
             height=300,
             bd=5,
@@ -120,7 +164,7 @@ class usuario:
         toplevelcadastro.pack(padx=20, pady=20, side="top")
         toplevelcadastro.pack_propagate(False)
 
-        titulo = tkinter.Label(toplevelcadastro, text="Digite o usuário\n(em caso de remoção, apenas cpf necessário)", font=("Arial", 12, "bold"))
+        titulo = tkinter.Label(toplevelcadastro, text="Digite o usuário", font=("Arial", 12, "bold"))
         titulo.pack(padx=0, pady=10, side="top")
 
 
@@ -128,7 +172,11 @@ class usuario:
         entrada_cpf = ttk.Entry(toplevelcadastro)
         entrada_cpf.pack(padx=0, pady=10, side="top")
 
-        tkinter.Label(toplevelcadastro, text="nome:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(toplevelcadastro, text="telefone:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        entrada_telefone = ttk.Entry(toplevelcadastro)
+        entrada_telefone.pack(padx=0, pady=10, side="top")
+
+        tkinter.Label(toplevelcadastro, text="nome: (opcional)", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_nome = ttk.Entry(toplevelcadastro)
         entrada_nome.pack(padx=0, pady=10, side="top")
 
@@ -200,7 +248,7 @@ class usuario:
         topleveldepenalidades.pack(padx=20, pady=20, side="top")
         topleveldepenalidades.pack_propagate(False)
 
-        titulo = tkinter.Label(topleveldepenalidades, text="Digite o cpf a ser penalizado", font=("Arial", 12, "bold"))
+        titulo = tkinter.Label(topleveldepenalidades, text="Digite o cpf e os pontos", font=("Arial", 12, "bold"))
         titulo.pack(padx=0, pady=10, side="top")
 
         tkinter.Label(topleveldepenalidades, text="cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
@@ -211,11 +259,14 @@ class usuario:
         entrada_pontos = ttk.Entry(topleveldepenalidades)
         entrada_pontos.pack(padx=0, pady=10, side="top")
 
-        enviar = tkinter.Button(topleveldepenalidades, text="Penalizar", command=usuario.somar_pontos, font=("Arial", 12, "bold"), width=7, height=3)
-        enviar.pack(padx=75, side="right")
+        enviar = tkinter.Button(topleveldepenalidades, text="Penalizar", command=usuario.add_pontos, font=("Arial", 12, "bold"), width=7, height=3)
+        enviar.pack(padx=10, side="right")
+
+        remover = tkinter.Button(topleveldepenalidades, text="Remover", command=usuario.remove_pontos, font=("Arial", 12, "bold"), width=7, height=3)
+        remover.pack(padx=10, side="right")
 
         limpar = tkinter.Button(topleveldepenalidades, text="Limpar", command=usuario.limpar_campo_penalidades, font=("Arial", 12, "bold"), width=7, height=3)
-        limpar.pack(padx=75, side="left")
+        limpar.pack(padx=65, side="left")
 
     def devolver():
 
@@ -225,14 +276,18 @@ class usuario:
              usuarios = json.load(arquivo)
         
         cpf = entrada_cpf.get()
-        
-        if usuarios[cpf]["livro"] != "Nenhum":
-             usuarios[cpf]["livro"] = "Nenhum"
-             usuarios[cpf]["prazo"] = 0
-             usuarios[cpf]["pontos"] -= 1
+
+        if cpf not in usuarios:
+             messagebox.showerror("Erro", "Este usuário não existe")
+             
+        if usuarios[cpf]["livro"] == "Nenhum":
+             messagebox.showerror("Erro", "Este usuário não possue um empréstimo no momento")
+        else:
+            usuarios[cpf]["livro"] = "Nenhum"
+            usuarios[cpf]["prazo"] = "0 dias"
         
         with open("Dados.JSON", "w") as arquivo:
-                json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+                usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
         
         entrada_cpf.delete(0, tkinter.END)
 
@@ -279,13 +334,42 @@ class usuario:
 
         if cpf in usuarios:
             del usuarios[cpf]
+        else:
+             messagebox.showerror("Erro", "esse usuário não existe")
 
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
-            json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+            usuarios = json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
+    def verificar_prazos():
+
+        global usuarios
+
+        with open("Dados.JSON", "r") as arquivo:
+                usuarios = json.load(arquivo)
+        for cpf in usuarios:
+
+            if usuarios[cpf]["prazo"] != "0 dias":
+
+                prazo = datetime.strptime(
+                usuarios[cpf]["prazo"],
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+                if datetime.now() >= prazo:
+
+                    usuarios[cpf]["pontos"] += 1
+                    usuarios[cpf]["livro"] = "Nenhum"
+                    usuarios[cpf]["prazo"] = "0 dias"
+
+        with open("Dados.JSON", "w") as arquivo:
+            usuarios = json.dump(usuarios, arquivo, indent=2)
+
+    def atualizar():
+        usuario.verificar_prazos()
+        Janela.after(1000, usuario.atualizar)
 
 def main():
                 
@@ -295,6 +379,7 @@ def main():
     Janela.title("Janela principal")
     Janela.geometry("1024x720")
     Janela.minsize(960, 720)
+    Janela.maxsize(960, 720)
     Janela.configure(bg="gray", bd=5, relief="solid")
 
     Head = tkinter.Frame(
@@ -309,7 +394,7 @@ def main():
     Head.pack(
 
         pady=40, 
-        padx=0, 
+        padx=40, 
         side="top"
 
     )
@@ -322,7 +407,7 @@ def main():
         font=("Arial", 25, "bold"),
         wraplength=400,
     )
-    Titulo.pack(pady=5)
+    Titulo.pack(pady=5, padx=40, side="left")
 
     Frame_direito = tkinter.Frame(
 
@@ -391,6 +476,13 @@ def main():
     explicacao_cadastros.pack(side="top")
     explicacao_cadastros.pack_propagate(False)
 
+    Label_cadastros = tkinter.Label(
+         explicacao_cadastros,
+         text="Analise de dados\n e prazos em tempo real",
+         font=("Arial", 12)
+    )
+    Label_cadastros.pack(padx=5, pady=5)
+
     explicacao_usuario = tkinter.Frame(
     
             area_explicacao,
@@ -401,6 +493,13 @@ def main():
     )
     explicacao_usuario.pack(side="top")
     explicacao_usuario.pack_propagate(False)
+
+    Label_usuario = tkinter.Label(
+             explicacao_usuario,
+             text="Cadastro e remoção\n através do CPF",
+             font=("Arial", 12)
+        )
+    Label_usuario.pack(padx=5, pady=5)
 
     explicacao_penalidade = tkinter.Frame(
     
@@ -413,6 +512,13 @@ def main():
     explicacao_penalidade.pack(side="top")
     explicacao_penalidade.pack_propagate(False)
 
+    Label_penalidade = tkinter.Label(
+                 explicacao_penalidade,
+                 text="Adição ou remoção\n de penalidades",
+                 font=("Arial", 12)
+            )
+    Label_penalidade.pack(padx=5, pady=5)
+
     explicacao_associar = tkinter.Frame(
     
              area_explicacao,
@@ -424,6 +530,13 @@ def main():
     explicacao_associar.pack(side="top")
     explicacao_associar.pack_propagate(False)
 
+    Label_associar = tkinter.Label(
+             explicacao_associar,
+             text="Empréstimo de livro\n por CPF",
+             font=("Arial", 12)
+        )
+    Label_associar.pack(padx=5, pady=5)
+
     explicacao_devolver = tkinter.Frame(
     
             area_explicacao,
@@ -434,6 +547,13 @@ def main():
     )
     explicacao_devolver.pack(side="top")
     explicacao_devolver.pack_propagate(False)
+
+    Label_devolver = tkinter.Label(
+             explicacao_devolver,
+             text="Devolução por informe\n de CPF",
+             font=("Arial", 12)
+        )
+    Label_devolver.pack(padx=5, pady=5)
 
     botao1 = tkinter.Button(
         area_botao,
@@ -457,7 +577,7 @@ def main():
 
     botao3 = tkinter.Button(
          area_botao,
-         text="Penalizar",
+         text="Pontos",
          font=("Arial", 12, "bold"),
          command=usuario.penalizar_por_cpf,
          width=14,
@@ -475,7 +595,7 @@ def main():
     )
     botao4.pack(anchor="w")
 
-    botao4 = tkinter.Button(
+    botao5 = tkinter.Button(
              area_botao,
              text="Devolução livro",
              font=("Arial", 12, "bold"),
@@ -483,22 +603,24 @@ def main():
              width=14,
              height=2
         )
-    botao4.pack(anchor="w")
+    botao5.pack(anchor="w")
 
     
-
+    usuario.atualizar()
     Janela.mainloop()
 
 def janela_pontos():
+
+    global usuarios
 
     try:
         with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
                 json.load(arquivo)
     except:
-            with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
                 json.dump({},arquivo)
-
-    global usuarios
+        with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
+                usuarios = json.load(arquivo)
 
     janela = tkinter.Toplevel(Janela)
     janela.title("Cadastros")
@@ -515,7 +637,7 @@ def janela_pontos():
 
     tabela = ttk.Treeview(
          cadastros,
-         columns=("cpf", "nome", "prazo", "livro", "pontos"),
+         columns=("cpf", "nome", "prazo", "livro", "pontos","telefone"),
          show="headings",
     )
 
@@ -524,12 +646,14 @@ def janela_pontos():
     tabela.heading("prazo", text="Prazo")
     tabela.heading("livro", text="Livro")
     tabela.heading("pontos", text="Pontos")
+    tabela.heading("telefone", text="Telefone")
 
-    tabela.column("cpf", width=120, anchor="center")
-    tabela.column("nome", width=180, anchor="center")
-    tabela.column("prazo", width=100, anchor="center")
-    tabela.column("livro", width=180, anchor="center")
+    tabela.column("cpf", width=100, anchor="center")
+    tabela.column("nome", width=100, anchor="center")
+    tabela.column("prazo", width=150, anchor="center")
+    tabela.column("livro", width=150, anchor="center")
     tabela.column("pontos", width=80, anchor="center")
+    tabela.column("telefone", width=100, anchor="center")
 
     with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
         usuarios = json.load(arquivo)
@@ -544,10 +668,14 @@ def janela_pontos():
             dados["nome"],
             dados["prazo"],
             dados["livro"],
-            dados["pontos"]
+            dados["pontos"],
+            dados["telefone"]
         )
     )
     tabela.pack(fill="both", expand=True)
+
+
+
 
 if __name__ == "__main__":
     main()
