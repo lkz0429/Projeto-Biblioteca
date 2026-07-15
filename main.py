@@ -1,9 +1,8 @@
 import tkinter
 from tkinter import ttk, messagebox
 import json
-import datetime
 from datetime import datetime, timedelta
-usuarios = {"Base": 0}
+usuarios = {}
 Janela = None
 entrada_nome = None
 entrada_telefone = None
@@ -17,6 +16,8 @@ class usuario:
         pass
 
     def definir_usuario():
+        
+        global usuarios, entrada_nome, entrada_cpf, entrada_telefone
 
         try:
             with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
@@ -27,16 +28,9 @@ class usuario:
             
             with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
                     usuarios = json.load(arquivo)
-
-        usuarios[entrada_cpf.get()] = {
-            "nome": entrada_nome.get(),
-            "prazo": f"{0} dias",
-            "livro": "Nenhum",
-            "pontos": int(0),
-            "telefone": entrada_telefone.get()
-        }
         cpf = entrada_cpf.get()
         telefone = entrada_telefone.get()
+        nome = entrada_nome.get()
         if entrada_cpf.get() == "":
              messagebox.showerror("Erro", "É necessário digitar\n um cpf")
              return
@@ -52,8 +46,37 @@ class usuario:
         "O telefone deve conter 10 ou 11 dígitos"
             )
             return
-
-
+        if cpf in usuarios:
+            messagebox.showerror(
+            "Erro",
+            "Já existe um usuário cadastrado com este CPF."
+        )
+            return
+        if not telefone.isdigit():
+            messagebox.showerror(
+                "Erro",
+                "O telefone deve conter apenas números."
+            )
+            return
+        if not cpf.isdigit():
+            messagebox.showerror(
+                "Erro",
+                "O CPF deve conter apenas números."
+            )
+            return
+        if nome and not nome.replace(" ", "").isalpha():
+            messagebox.showerror(
+                "Erro",
+                "O nome deve conter apenas letras."
+            )
+            return
+        usuarios[cpf] = {
+                    "nome": entrada_nome.get(),
+                    "prazo": f"{0} dias",
+                    "livro": "Nenhum",
+                    "pontos": int(0),
+                    "telefone": entrada_telefone.get()
+                }
         with open("Dados.JSON", "w", encoding="utf-8") as Dados_usuarios:
             json.dump(usuarios, Dados_usuarios, ensure_ascii=False, indent=2)
 
@@ -85,7 +108,7 @@ class usuario:
 
     def emprestar():
 
-        global usuarios
+        global usuarios, entrada_cpf, entrada_livro
 
         with open("Dados.JSON", "r") as arquivo:
              usuarios = json.load(arquivo)
@@ -94,11 +117,43 @@ class usuario:
         livro = entrada_livro.get()
         prazo = datetime.now() + timedelta(seconds=15)
 
+        if cpf == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe um CPF."
+            )
+            return
+
+        if livro == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe o nome do livro."
+            )
+            return
+
+        if cpf not in usuarios:
+            messagebox.showerror(
+                "Erro",
+                "Nenhum usuário encontrado para o CPF informado."
+            )
+            return
+
+        if usuarios[cpf]["livro"] != "Nenhum":
+            messagebox.showerror(
+                "Erro",
+                "Este usuário já possui um livro emprestado."
+            )
+            return
+
         for cpf_ocupante in usuarios:
             if usuarios[cpf_ocupante]["livro"] == livro:
-                 messagebox.showerror("Erro", "Livro já está emprestado\n aguarde o prazo do possuinte acabar")
-                 return
-        usuarios[cpf]["livro"] = livro         
+                messagebox.showerror(
+                    "Erro",
+                    "Este livro já está emprestado."
+                )
+                return
+
+        usuarios[cpf]["livro"] = livro
         usuarios[cpf]["prazo"] = prazo.strftime("%Y-%m-%d %H:%M:%S")
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
@@ -107,6 +162,11 @@ class usuario:
 
         entrada_livro.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
+        
+        messagebox.showinfo(
+    "Sucesso",
+    "Livro emprestado com sucesso."
+)
 
     def add_pontos():
 
@@ -116,22 +176,56 @@ class usuario:
              usuarios = json.load(arquivo)
 
         cpf = entrada_cpf.get()
-        pontos = int(entrada_pontos.get())
+        pontos = entrada_pontos.get()
 
-        if pontos >= 1:
-            usuarios[cpf]["pontos"] += pontos
-        else:
-             messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
-             return
-        
-        
+        if cpf == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe um CPF."
+            )
+            return
 
-        with open("Dados.JSON", "w") as arquivo:
+        if entrada_pontos.get() == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe a quantidade de pontos."
+            )
+            return
+
+        try:
+            pontos = int(entrada_pontos.get())
+        except ValueError:
+            messagebox.showerror(
+                "Erro",
+                "Informe um número inteiro."
+            )
+            return
+        if cpf not in usuarios:
+                    messagebox.showerror(
+                        "Erro",
+                        "Nenhum usuário encontrado para o CPF informado."
+                    )
+                    return
+
+        if pontos <= 0:
+            messagebox.showerror(
+                "Erro",
+                "Os pontos devem ser maiores que zero."
+            )
+            return
+        
+        usuarios[cpf]["pontos"] += pontos
+         
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
             json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
 
         entrada_pontos.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)  
 
+        messagebox.showinfo(
+    "Sucesso",
+    f"Penalidade aplicada com sucesso\n pontos atuais do cpf: {usuarios[cpf]["pontos"]}."
+)
     def remove_pontos():
     
         global usuarios
@@ -140,21 +234,63 @@ class usuario:
             usuarios = json.load(arquivo)
     
         cpf = entrada_cpf.get()
-        pontos = int(entrada_pontos.get())
+        pontos = entrada_pontos.get()
+
+        if cpf == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe um CPF."
+            )
+            return
+
+        if entrada_pontos.get() == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe a quantidade de pontos."
+            )
+            return
+
+        try:
+            pontos = int(entrada_pontos.get())
+        except ValueError:
+            messagebox.showerror(
+                "Erro",
+                "Informe um número inteiro."
+            )
+            return
+        
+        if cpf not in usuarios:
+                    messagebox.showerror(
+                        "Erro",
+                        "Nenhum usuário encontrado para o CPF informado."
+                    )
+                    return
+
+        if pontos <= 0:
+            messagebox.showerror(
+                "Erro",
+                "Os pontos devem ser maiores que zero."
+            )
+            return
+        if usuarios[cpf]["pontos"] < pontos:
+            messagebox.showerror(
+                "Erro",
+                "O usuário não possui essa quantidade de pontos."
+            )
+            return
+
+        usuarios[cpf]["pontos"] -= pontos
     
-        if pontos >= 1:
-            usuarios[cpf]["pontos"] -= pontos
-        else:
-                messagebox.showerror("Erro", "Os pontos devem ser inteiros positivos")
-                return
-            
-            
-    
-        with open("Dados.JSON", "w") as arquivo:
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
             json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
     
         entrada_pontos.delete(0, tkinter.END)
-        entrada_cpf.delete(0, tkinter.END)             
+        entrada_cpf.delete(0, tkinter.END) 
+        
+        messagebox.showinfo(
+    "Sucesso",
+    f"Penalidade removida com sucesso\n pontos atuais do cpf: {usuarios[cpf]["pontos"]}"
+)            
 
     def adicionar_usuario():
 
@@ -291,22 +427,40 @@ class usuario:
              usuarios = json.load(arquivo)
         
         cpf = entrada_cpf.get()
+        
+        if cpf == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe um CPF."
+            )
+            return
 
         if cpf not in usuarios:
-             messagebox.showerror("Erro", "Este usuário não existe")
-             return
-             
+            messagebox.showerror(
+                "Erro",
+                "Nenhum usuário encontrado para o CPF informado."
+            )
+            return
+
         if usuarios[cpf]["livro"] == "Nenhum":
-             messagebox.showerror("Erro", "Este usuário não possue um empréstimo no momento")
-             return
-        else:
-            usuarios[cpf]["livro"] = "Nenhum"
-            usuarios[cpf]["prazo"] = "0 dias"
+            messagebox.showerror(
+                "Erro",
+                "Este usuário não possui empréstimos ativos."
+            )
+            return
+
+        usuarios[cpf]["livro"] = "Nenhum"
+        usuarios[cpf]["prazo"] = "0 dias"
         
-        with open("Dados.JSON", "w") as arquivo:
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
                 json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
         
         entrada_cpf.delete(0, tkinter.END)
+        
+        messagebox.showinfo(
+    "Sucesso",
+    "Livro devolvido com sucesso."
+)
 
     def devolver_livro():
 
@@ -343,23 +497,41 @@ class usuario:
         limpar.pack(padx=75, side="left")
 
     def remover_usuario():
-
+        
+        global usuarios
+        
         with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
             usuarios = json.load(arquivo)
 
         cpf = entrada_cpf.get()
 
-        if cpf in usuarios:
-            del usuarios[cpf]
-        else:
-             messagebox.showerror("Erro", "esse usuário não existe")
-             return
+        if cpf == "":
+            messagebox.showerror(
+                "Erro",
+                "Informe um CPF."
+            )
+            return
+
+        if cpf not in usuarios:
+            messagebox.showerror(
+                "Erro",
+                "Nenhum usuário encontrado para o CPF informado."
+            )
+            return
+        
+        del usuarios[cpf]
 
         entrada_nome.delete(0, tkinter.END)
         entrada_cpf.delete(0, tkinter.END)
+        entrada_telefone.delete(0, tkinter.END)
 
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
             json.dump(usuarios, arquivo, ensure_ascii=False, indent=2)
+            
+        messagebox.showinfo(
+    "Sucesso",
+    "Usuário removido com sucesso."
+)
 
     def verificar_prazos():
 
@@ -372,6 +544,9 @@ class usuario:
 
             if usuarios[cpf]["prazo"] != "0 dias":
 
+                if usuarios[cpf]["prazo"] in ("0 dias", "Em atraso"):
+                    continue
+
                 prazo = datetime.strptime(
                 usuarios[cpf]["prazo"],
                 "%Y-%m-%d %H:%M:%S"
@@ -380,9 +555,9 @@ class usuario:
                 if datetime.now() >= prazo:
 
                     usuarios[cpf]["pontos"] += 1
-                    usuarios[cpf]["prazo"] = "0 dias"
+                    usuarios[cpf]["prazo"] = "Em atraso"
 
-        with open("Dados.JSON", "w") as arquivo:
+        with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
            json.dump(usuarios, arquivo, indent=2)
 
     def atualizar():
@@ -633,7 +808,7 @@ def janela_pontos():
 
     try:
         with open("Dados.JSON", "r", encoding="utf-8") as arquivo:
-                json.load(arquivo)
+                usuarios = json.load(arquivo)
     except:
         with open("Dados.JSON", "w", encoding="utf-8") as arquivo:
                 json.dump({},arquivo)
