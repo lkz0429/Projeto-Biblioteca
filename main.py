@@ -319,15 +319,15 @@ class usuario:
         titulo.pack(padx=0, pady=10, side="top")
 
 
-        tkinter.Label(toplevelcadastro, text="cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(toplevelcadastro, text="Cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_cpf = ttk.Entry(toplevelcadastro)
         entrada_cpf.pack(padx=0, pady=10, side="top")
 
-        tkinter.Label(toplevelcadastro, text="telefone:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(toplevelcadastro, text="Telefone:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_telefone = ttk.Entry(toplevelcadastro)
         entrada_telefone.pack(padx=0, pady=10, side="top")
 
-        tkinter.Label(toplevelcadastro, text="nome: (opcional)", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(toplevelcadastro, text="Nome: (opcional)", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_nome = ttk.Entry(toplevelcadastro)
         entrada_nome.pack(padx=0, pady=10, side="top")
 
@@ -402,11 +402,11 @@ class usuario:
         titulo = tkinter.Label(topleveldepenalidades, text="Digite o cpf e os pontos", font=("Arial", 12, "bold"))
         titulo.pack(padx=0, pady=10, side="top")
 
-        tkinter.Label(topleveldepenalidades, text="cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(topleveldepenalidades, text="Cpf:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_cpf = ttk.Entry(topleveldepenalidades)
         entrada_cpf.pack(padx=0, pady=10, side="top")
 
-        tkinter.Label(topleveldepenalidades, text="quantia:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
+        tkinter.Label(topleveldepenalidades, text="Quantia:", font=("Arial", 12, "bold")).pack(padx=0, side="top")
         entrada_pontos = ttk.Entry(topleveldepenalidades)
         entrada_pontos.pack(padx=0, pady=10, side="top")
 
@@ -516,6 +516,12 @@ class usuario:
             messagebox.showerror(
                 "Erro",
                 "Nenhum usuário encontrado para o CPF informado."
+            )
+            return
+        if usuarios[cpf]["livro"] != "Nenhum":
+            messagebox.showerror(
+                "Erro",
+                "Este usuário possue um empréstimo"
             )
             return
         
